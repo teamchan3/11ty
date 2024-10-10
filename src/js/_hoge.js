@@ -1,3 +1,5 @@
-export default function hoge() {
-  console.log("hoge");
+export default class Hoge {
+  constructor() {
+    console.log("hoge");
+  }
 }

@@ -1,0 +1,5 @@
+@layer components {
+  .c-hoge {
+    @apply text-red-500;
+  }
+}

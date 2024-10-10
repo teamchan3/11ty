@@ -1,5 +1,3 @@
-import hoge from "./_hoge.js";
+import Hoge from "./_hoge";
 
-hoge();
-
-console.log("Hello, world!");
+new Hoge();

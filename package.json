@@ -1,37 +1,40 @@
 {
-  "type": "module",
-  "name": "my-11ty-project",
+  "name": "11ty-project",
   "version": "1.0.0",
+  "main": "index.js",
   "scripts": {
-    "clean:dist": "rimraf dist",
+    "build:dev": "tsx node_modules/@11ty/eleventy/cmd.cjs --config=eleventy.config.ts --serve --incremental",
+    "build:pro": "tsx node_modules/@11ty/eleventy/cmd.cjs --config=eleventy.config.ts",
+    "clean:dev": "rimraf dist",
     "clean:build": "rimraf build",
-    "build:eleventy": "eleventy --config=eleventy.config.mjs",
-    "build:tailwind": "postcss src/css/tailwind.css -o dist/css/style.css",
-    "build": "npm run clean:dist && cross-env ELEVENTY_ENV=development npm run build:eleventy",
-    "build:prod": "npm run clean:build && cross-env ELEVENTY_ENV=production npm run build:eleventy",
-    "dev": "npm run clean:dist && cross-env ELEVENTY_ENV=development eleventy --config=eleventy.config.mjs --serve",
-    "start": "npm run dev"
+    "clean:all": "rimraf dist build",
+    "dev": "npm run clean:dev && npm run build:dev",
+    "build": "npm run clean:build && npm run build:pro"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "type": "module",
   "dependencies": {
-    "@11ty/eleventy": "^3.0.0",
-    "concurrently": "^6.4.0",
-    "tailwindcss": "^3.0.0"
+    "@11ty/eleventy": "^3.0.0-beta.1",
+    "jsx-async-runtime": "^0.5.2"
   },
   "devDependencies": {
+    "@types/node": "^22.7.5",
     "autoprefixer": "^10.4.20",
-    "cross-env": "^7.0.3",
-    "cssnano": "^7.0.6",
+    "clsx": "^2.1.1",
+    "concurrently": "^9.0.1",
     "esbuild": "^0.24.0",
-    "html-minifier": "^4.0.0",
-    "imagemin": "^9.0.0",
-    "imagemin-mozjpeg": "^10.0.0",
-    "imagemin-pngquant": "^10.0.0",
-    "imagemin-svgo": "^11.0.1",
-    "js-beautify": "^1.15.1",
+    "glob": "^11.0.0",
     "postcss": "^8.4.47",
     "postcss-cli": "^11.0.0",
-    "react-dom": "^18.3.1",
+    "postcss-import": "^16.1.0",
+    "postcss-nesting": "^13.0.0",
+    "postcss-preset-env": "^10.0.6",
+    "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
+    "tailwindcss": "^3.4.13",
     "tsx": "^4.19.1"
   }
 }
