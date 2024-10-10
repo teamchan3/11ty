@@ -1,9 +1,13 @@
-module.exports = (ctx) => ({
+import tailwindcss from "tailwindcss";
+import autoprefixer from "autoprefixer";
+import cssnano from "cssnano";
+
+export default (ctx) => ({
   plugins: [
-    require("tailwindcss"),
-    require("autoprefixer"),
+    tailwindcss,
+    autoprefixer,
     ctx.env === "production"
-      ? require("cssnano")({
+      ? cssnano({
           preset: [
             "default",
             {

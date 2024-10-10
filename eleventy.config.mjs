@@ -1,17 +1,18 @@
-const beautify = require("js-beautify").html;
-const esbuild = require("esbuild");
-const path = require("path");
-const postcss = require("postcss");
-const fs = require("fs").promises;
-const { rimraf } = require("rimraf");
-const { glob } = require("glob");
+import beautify from "js-beautify";
+import * as esbuild from "esbuild";
+import path from "path";
+import postcss from "postcss";
+import { promises as fs } from "fs";
+import { rimraf } from "rimraf";
+import { glob } from "glob";
+import "tsx/esm";
+import { renderToStaticMarkup } from "react-dom/server";
 
-module.exports = function (eleventyConfig) {
+export default function (eleventyConfig) {
   console.log("Eleventy config is running");
   console.log("Current working directory:", process.cwd());
   console.log("_includes directory:", path.resolve("src/_includes"));
 
-  // 環境変数を取得（デフォルトは開発環境）
   const isProd = process.env.ELEVENTY_ENV === "production";
   const outputDir = isProd ? "build" : "dist";
 
@@ -21,7 +22,7 @@ module.exports = function (eleventyConfig) {
   // HTML Beautifier設定
   eleventyConfig.addTransform("beautify", function (content, outputPath) {
     if (outputPath && outputPath.endsWith(".html")) {
-      let beautified = beautify(content, {
+      let beautified = beautify.html(content, {
         indent_size: 2,
         indent_char: " ",
         max_preserve_newlines: 1,
@@ -45,19 +46,15 @@ module.exports = function (eleventyConfig) {
     return content;
   });
 
-  // ビルド前のクリーンアップとアセット処理
   eleventyConfig.on("eleventy.before", async () => {
-    // 出力ディレクトリのクリーンアップ
     console.log(`Cleaning ${outputDir} directory...`);
     await rimraf(outputDir);
     console.log(`${outputDir} directory cleaned.`);
 
-    // 必要なディレクトリを作成
     await fs.mkdir(`${outputDir}/css`, { recursive: true });
     await fs.mkdir(`${outputDir}/js`, { recursive: true });
     await fs.mkdir(`${outputDir}/images`, { recursive: true });
 
-    // JavaScript処理
     await esbuild.build({
       entryPoints: ["src/js/script.js"],
       bundle: true,
@@ -68,8 +65,7 @@ module.exports = function (eleventyConfig) {
       logLevel: "info",
     });
 
-    // CSS処理
-    const postcssConfig = require("./postcss.config.js")({
+    const postcssConfig = (await import("./postcss.config.js")).default({
       env: isProd ? "production" : "development",
     });
     const css = await fs.readFile("src/css/tailwind.css", "utf8");
@@ -85,9 +81,7 @@ module.exports = function (eleventyConfig) {
       );
     }
 
-    // 画像の処理
     if (isProd) {
-      // 本番環境: 画像の最適化
       const imagemin = (await import("imagemin")).default;
       const imageminMozjpeg = (await import("imagemin-mozjpeg")).default;
       const imageminPngquant = (await import("imagemin-pngquant")).default;
@@ -105,7 +99,6 @@ module.exports = function (eleventyConfig) {
       });
       console.log("画像の最適化が完了しました:", files.length);
     } else {
-      // 開発環境: 画像を単純にコピー
       const imageFiles = await glob("src/images/**/*.{jpg,png,svg}");
       for (const file of imageFiles) {
         const destPath = file.replace("src/", `${outputDir}/`);
@@ -116,6 +109,17 @@ module.exports = function (eleventyConfig) {
     }
   });
 
+  eleventyConfig.addExtension(["11ty.jsx", "11ty.ts", "11ty.tsx"], {
+    key: "11ty.js",
+    compile: function () {
+      return async function (data) {
+        let content = await this.defaultRenderer(data);
+        return renderToStaticMarkup(content);
+      };
+    },
+  });
+  eleventyConfig.addTemplateFormats("11ty.jsx,11ty.tsx");
+
   return {
     dir: {
       input: "src",
@@ -124,4 +128,4 @@ module.exports = function (eleventyConfig) {
       output: outputDir,
     },
   };
-};
+}
